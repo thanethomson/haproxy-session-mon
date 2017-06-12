@@ -98,4 +98,5 @@ pip-selfcheck.json
 
 # Generated folders
 public/
+/testing/
 
