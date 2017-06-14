@@ -11,7 +11,10 @@ logger = logging.getLogger(__name__)
 __all__ = [
     "load_haproxysessionmon_config",
     "load_haproxysessionmon_config_from_file",
-    "CONFIG_DEFAULTS"
+    "CONFIG_DEFAULTS",
+    "CONFIG_BACKEND_TYPE_GELF",
+    "CONFIG_BACKEND_TYPE_PRTG",
+    "CONFIG_BACKEND_TYPE_LOGFILE"
 ]
 
 CONFIG_DEFAULTS = {
@@ -54,6 +57,9 @@ def validate_logging_config(config):
                 raise ConfigError("Invalid logging level: {}".format(config['logging']['level']))
         else:
             config['logging']['level'] = CONFIG_DEFAULTS['logging']['level']
+
+        if 'file' not in config['logging']:
+            config['logging']['file'] = None
     else:
         # just use all the defaults
         config['logging'] = deepcopy(CONFIG_DEFAULTS['logging'])

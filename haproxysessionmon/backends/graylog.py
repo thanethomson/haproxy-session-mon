@@ -18,13 +18,13 @@ class GraylogBackend(StorageBackend):
     def __init__(self, remote_addr, loop, facility="haproxy-session-mon"):
         self.remote_addr = remote_addr
         self.loop = loop
+        self.facility = facility
 
-        logger.debug("Connecting to Graylog server at {}".format(self.remote_addr))
+        logger.debug("Connecting to Graylog server at {}:{}".format(*self.remote_addr))
         self.transport, self.protocol = loop.run_until_complete(loop.create_datagram_endpoint(
             lambda: GraylogProtocol(self, facility=facility),
             remote_addr=remote_addr
         ))
-        self.facility = facility
 
     async def store_stats(self, stats):
         logger.debug("Sending {} metrics to Graylog".format(len(stats)))
@@ -39,6 +39,16 @@ class GraylogBackend(StorageBackend):
 
     def close(self):
         self.transport.close()
+
+    async def _reconnect(self):
+        logger.warning("Reconnecting to Graylog server at {}:{}".format(*self.remote_addr))
+        self.transport, self.protocol = await self.loop.create_datagram_endpoint(
+            lambda: GraylogProtocol(self, facility=self.facility),
+            remote_addr=self.remote_addr
+        )
+
+    def reconnect(self):
+        self.loop.call_soon(self._reconnect())
 
 
 class GraylogProtocol(object):
@@ -58,7 +68,7 @@ class GraylogProtocol(object):
         payload = {
             "version": "1.1",
             "host": metric.server_id,
-            "short_message": "{} concurrent requests measured for backend {}".format(
+            "short_message": "{} concurrent requests measured for backend \"{}\"".format(
                 metric.sessions,
                 metric.backend
             ),
@@ -72,8 +82,13 @@ class GraylogProtocol(object):
 
     def error_received(self, exc):
         logger.exception("Error while communicating with Graylog server: {}".format(exc))
-        self.transport.close()
+        self.close_and_reconnect()
 
     def connection_lost(self, exc):
         logger.exception("Connection to Graylog server lost: {}".format(exc))
+        self.close_and_reconnect()
+
+    def close_and_reconnect(self):
         self.transport.close()
+        if self.reconnect_on_failure:
+            self.backend.reconnect()
