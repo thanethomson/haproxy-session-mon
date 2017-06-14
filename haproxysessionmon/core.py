@@ -6,6 +6,7 @@ import signal
 import functools
 import sys
 
+from haproxysessionmon import __version__ as VERSION
 from haproxysessionmon.config import *
 from haproxysessionmon.errors import *
 from haproxysessionmon.haproxy import *
@@ -95,16 +96,29 @@ def main():
     parser = argparse.ArgumentParser(description="HAProxy Session Monitor")
     parser.add_argument(
         "-c", "--config",
-        required=True,
         help="Full path to the configuration file to use."
     )
+    parser.add_argument(
+        "-v", "--version",
+        required=False,
+        action="store_true",
+        help="Display the version of the application and exit."
+    )
     args = parser.parse_args()
+
+    if args.version:
+        print("HAProxy Session Monitor v{}".format(VERSION))
+        sys.exit(0)
+
+    if not args.config:
+        print("A configuration file is required for the HAProxy Session Monitor application to work.")
+        sys.exit(1)
 
     try:
         config = load_haproxysessionmon_config_from_file(args.config)
     except ConfigError as e:
         print(e)
-        sys.exit(1)
+        sys.exit(2)
 
     configure_logging(
         to_file=config['logging']['file'],
