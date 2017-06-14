@@ -18,7 +18,7 @@ class LogfileBackend(StorageBackend):
         self.logger = logging.getLogger("logfile-backend")
         self.logger.handlers = [self.handler]
         self.logger.info("[Logfile backend started]")
-        self.logger.info("server_id\tendpoint\tbackend\tsessions")
+        self.logger.info("server_id\tendpoint\tbackend\tsessions\tqueued_sessions\tactive_backends\thttp_4xx\thttp5xx")
 
     async def store_stats(self, stats):
         for metric in stats:
@@ -26,5 +26,9 @@ class LogfileBackend(StorageBackend):
                 metric.server_id,
                 metric.endpoint,
                 metric.backend,
-                metric.sessions
+                metric.sessions,
+                metric.queued_sessions,
+                metric.active_backends,
+                metric.http_4xx,
+                metric.http_5xx
             ))

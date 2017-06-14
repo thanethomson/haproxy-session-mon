@@ -76,7 +76,11 @@ class GraylogProtocol(object):
             "level": 6,  # INFO
             "_facility": self.facility,
             "_sessions": metric.sessions,
-            "_backend": metric.backend
+            "_backend": metric.backend,
+            "_queued_sessions": metric.queued_sessions,
+            "_active_backends": metric.active_backends,
+            "_http_4xx": metric.http_4xx,
+            "_http_5xx": metric.http_5xx
         }
         self.transport.sendto(json.dumps(payload).encode())
 

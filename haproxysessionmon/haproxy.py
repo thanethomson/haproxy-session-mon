@@ -17,7 +17,11 @@ ProxyMetrics = namedtuple("ProxyMetrics", [
     "server_id",
     "endpoint",
     "backend",
-    "sessions"
+    "sessions",
+    "queued_sessions",
+    "active_backends",
+    "http_4xx",
+    "http_5xx"
 ])
 
 
@@ -86,6 +90,10 @@ class HAProxyServerMonitor(object):
                     server_id=self.id,
                     endpoint=self.stats_csv_endpoint,
                     backend=row['# pxname'],
-                    sessions=int(row['rate'])
+                    sessions=int(row['rate']) if row['rate'] else 0,
+                    queued_sessions=int(row['qcur']) if row['qcur'] else 0,
+                    active_backends=int(row['act']) if row['act'] else 0,
+                    http_4xx=int(row['hrsp_4xx']) if row['hrsp_4xx'] else 0,
+                    http_5xx=int(row['hrsp_5xx']) if row['hrsp_5xx'] else 0
                 ))
         return stats
