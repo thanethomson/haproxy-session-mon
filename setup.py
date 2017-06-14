@@ -37,7 +37,7 @@ setup(
     install_requires=[r.strip() for r in read_file("requirements.txt") if len(r.strip()) > 0],
     entry_points={
         'console_scripts': [
-            'haproxysessionmon = haproxysessionmon.server:main',
+            'haproxysessionmon = haproxysessionmon.core:main',
         ]
     },
     license='MIT',
