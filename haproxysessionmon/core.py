@@ -5,6 +5,7 @@ import aiohttp
 import signal
 import functools
 import sys
+import os
 
 from haproxysessionmon import __version__ as VERSION
 from haproxysessionmon.config import *
@@ -110,12 +111,14 @@ def main():
         print("HAProxy Session Monitor v{}".format(VERSION))
         sys.exit(0)
 
-    if not args.config:
+    config_file = os.environ.get("HAPROXYSM_CONFIG_FILE", args.config)
+
+    if not config_file:
         print("A configuration file is required for the HAProxy Session Monitor application to work.")
         sys.exit(1)
 
     try:
-        config = load_haproxysessionmon_config_from_file(args.config)
+        config = load_haproxysessionmon_config_from_file(config_file)
     except ConfigError as e:
         print(e)
         sys.exit(2)
@@ -125,6 +128,7 @@ def main():
         to_console=config['logging']['console'],
         level=config['logging']['level']
     )
+    logger.debug("Loaded configuration from file: {}".format(config_file))
     loop = asyncio.get_event_loop()
     configure_signal_handling(loop)
     monitors = create_monitors(config, loop)
