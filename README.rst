@@ -23,6 +23,11 @@ Only Python 3.5+ (ideally 3.6+) is required to run this software.
 Installation
 ------------
 
+There are two possible ways to install the HAProxy Session Monitor.
+
+Local/Native Installation
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
 In order to install the session monitor, it is recommended that one
 install it into a virtual environment:
 
@@ -40,8 +45,35 @@ install it into a virtual environment:
     # Run the session monitor
     > haproxysessionmon -h
 
+Docker
+~~~~~~
+
+To build the Docker image, simply do the following:
+
+.. code:: bash
+
+    # Builds the image with the given base tag, automatically creating
+    # tags for the current package version and the :latest tag
+    > ./build-docker-image.sh service/haproxysessionmon
+
+If you'd like to specify a custom Docker registry, simply do the
+following:
+
+.. code:: bash
+
+    # This will create the same two tags as in the previous command,
+    # but will now additionally create tags for the image containing your
+    # Docker repo's address
+    > ./build-docker-image.sh service/haproxysessionmon my-docker-registry.local:5001
+
 Running
 -------
+
+You can either run the monitor from within your virtual environment, or
+you can run it from Docker.
+
+From Your Virtual Environment
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To run the application to monitor one or more HAProxy hosts, simply run
 the following:
@@ -61,6 +93,30 @@ environment variables, simply do the following:
 See the following section for details as to how to configure the session
 monitor. At present, the application runs purely in the foreground (will
 allow for easy Dockerisation).
+
+From Docker
+~~~~~~~~~~~
+
+Say, for example, you've tagged your image with the tag
+``service/haproxysessionmon:latest``, and you want to run the container
+in the background:
+
+.. code:: bash
+
+    > docker run --name haproxysm1 \
+        -v /path/to/config/folder:/etc/haproxysessionmon \
+        -d service/haproxysessionmon
+
+This assumes that your configuration file is located on your local
+machine at ``/path/to/config/folder/config.yml``. If you have a custom
+configuration file name:
+
+.. code:: bash
+
+    > docker run --name haproxysm1 \
+        -v /path/to/config/folder:/etc/haproxysessionmon \
+        --env HAPROXYSM_CONFIG_FILE=/etc/haproxysessionmon/custom-config.yml \
+        -d service/haproxysessionmon
 
 Configuration
 -------------
