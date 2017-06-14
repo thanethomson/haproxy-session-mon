@@ -50,6 +50,14 @@ the following:
 
     > haproxysessionmon -c /path/to/config-file.yml
 
+Or, alternatively, to set the path to the configuration file in your
+environment variables, simply do the following:
+
+.. code:: bash
+
+    > export HAPROXYSM_CONFIG_FILE=/path/to/config-file.yml
+    > haproxysessionmon
+
 See the following section for details as to how to configure the session
 monitor. At present, the application runs purely in the foreground (will
 allow for easy Dockerisation).
