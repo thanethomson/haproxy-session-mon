@@ -9,7 +9,40 @@ backends. So far, there are several possible backends for monitoring:
 
 1. Log file (local to machine)
 2. Graylog (using [GELF](http://docs.graylog.org/en/stable/pages/gelf.html))
-3. [PRTG](https://www.paessler.com/prtg)
+3. [PRTG](https://www.paessler.com/prtg) (*coming soon!*)
+
+## Requirements
+Only Python 3.5+ (ideally 3.6+) is required to run this software.
+
+## Installation
+In order to install the session monitor, it is recommended that one
+install it into a virtual environment:
+
+```bash
+# Where do you want to install the monitor?
+> cd /path/to/some/folder
+
+# Create a virtual environment using Python 3.6 in the current folder
+> python3.6 -m venv .
+
+# Activate the virtual environment
+> source bin/activate
+
+# Run the session monitor
+> haproxysessionmon -h
+```
+
+## Running
+To run the application to monitor one or more HAProxy hosts, simply
+run the following:
+
+```bash
+> haproxysessionmon -c /path/to/config-file.yml
+```
+
+See the following section for details as to how to configure the
+session monitor. At present, the application runs purely in the
+foreground (will allow for easy Dockerisation).
 
 ## Configuration
 The HAProxy Session Monitor uses [YAML](https://en.wikipedia.org/wiki/YAML)
@@ -48,6 +81,7 @@ backends:
 
 # The HAProxy servers to monitor
 servers:
+    # The ID of the following HAProxy server will be "lb-primary"
     lb-primary:
         # Full URL to the CSV endpoint to poll
         endpoint: "http://lb-primary:8080/haproxy?stats;csv"
@@ -82,6 +116,42 @@ one to specify the following configuration options:
   write privileges to this file. Default: `None`.
 * `console` (optional): If `true`, application logs will also be
   output to `stdout`. Default: `true`.
+
+### Graylog Backend Configuration
+At present, this backend (type: `gelf`) allows you to pipe statistics
+to a Graylog instance via UDP using [GELF](http://docs.graylog.org/en/stable/pages/gelf.html).
+The following configuration options are possible for a Graylog backend:
+
+* `host`: The host IP address for the collector endpoint.
+* `port`: The host port for the collector endpoint.
+* `facility`: A unique identifier for all of the statistics collected
+  on behalf of this backend.
+
+When this data is sent to the Graylog collector endpoint, the following
+important fields are sent through:
+
+* `host`: The ID of the HAProxy server for which these stats are
+  relevant (this corresponds to the ID given to the server under the
+  `servers` section of the configuration file.
+* `facility`: The facility specified in the configuration for this
+  particular backend.
+* `sessions`: The integer value representing the number of concurrent
+  sessions going through the HAProxy host being monitored.
+* `backend`: The name given to the HAProxy backend (as configured in
+  the HAProxy server itself) for which the concurrent session count
+  is relevant.
+
+### PRTG Backend Configuration
+This backend is currently still under construction, and should
+be available soon.
+
+### Log File Backend Configuration
+This backend (type: `logfile`) allows you to append statistics to a log
+file by way of simple logging. The following configuration options are
+possible for the log file:
+
+* `path`: The full filesystem path to the file to which to write the
+  logs.
 
 ## License
 
