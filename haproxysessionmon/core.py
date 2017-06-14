@@ -116,9 +116,10 @@ def main():
     monitors = create_monitors(config, loop)
 
     try:
+        logger.info("Starting up {} monitor(s)".format(len(monitors)))
         loop.run_until_complete(run_monitors(monitors, loop))
     finally:
-        logger.debug("Shutting down event loop")
+        logger.info("Shutting down event loop")
         loop.run_until_complete(loop.shutdown_asyncgens())
         loop.close()
 
